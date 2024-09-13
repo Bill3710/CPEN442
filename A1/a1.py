@@ -9,11 +9,28 @@ def index_of_coincidence(text: str) -> float:
 
 def vigenere_encrypt(plaintext: str, key: str) -> str:
     """Encrypts a plaintext with the given key using the Vigenere cipher, returning the ciphertext. You may assume the plaintext and key are strings that only contain ascii uppercase characters."""
-    return ''
+    if plaintext == "" or key == "":
+        return -1
+    offsetASCII = 65 # ASCII for 'A'
+    ciphertext = ''
+    for charK in key:
+        for charP in plaintext:
+            ciphertext += chr(ord(charK) + ord(charP) - offsetASCII)
+    return ciphertext
 
 def vigenere_decrypt(ciphertext: str, key: str) -> str:
     """Decrypts a ciphertext with the given key using the Vigenere cipher, returning the plaintext. You may assume the ciphertext and key are strings that only contain ascii uppercase characters."""
-    return ''
+    if ciphertext == "" or key == "":
+        return -1
+    offsetASCII = 65 # ASCII for 'A'
+    plaintext = ''
+    for charK in key:
+        for charC in ciphertext:
+            if ord(charC) < ord(charK):
+                plaintext += chr(ord(charC) + 26 - ord(charK) + offsetASCII)
+            else :
+                plaintext += chr(ord(charC) - ord(charK) + offsetASCII)
+    return plaintext
 
 
 def crack_key_length_vigenere(ciphertext: str) -> int:
