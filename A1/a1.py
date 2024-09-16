@@ -35,8 +35,28 @@ def vigenere_decrypt(ciphertext: str, key: str) -> str:
 
 def crack_key_length_vigenere(ciphertext: str) -> int:
     """Returns the length of the key that was used to generate the given ciphertext with a Vigenere cipher"""
-    return 0
+    keyLengths = range(2, 21)
+    best_length = 0
+    best_ic = 0.0
 
+    for key_length in keyLengths:
+            subsequences = []
+            for _ in range(key_length):
+                subsequences.append('')
+
+            for i, char in enumerate(ciphertext):
+                subsequences[i % key_length] += char
+
+            total_ic = 0.0
+            for sub in subsequences:
+                total_ic += index_of_coincidence(sub)
+            average_ic = total_ic / key_length
+
+            if average_ic > best_ic:
+                best_ic = average_ic
+                best_length = key_length
+
+    return best_length
 
 def crack_vigenere(ciphertext: str) -> tuple[str, str]:
     """Given a ciphertext generated with the Vigenere cipher, this function cracks the secret key and returns both the key and the plaintext."""
