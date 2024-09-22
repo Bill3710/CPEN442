@@ -1,3 +1,5 @@
+import string
+from collections import Counter
 def index_of_coincidence(text: str) -> float:
     """Returns the index of coincidence of a text, assuming the alphabet is of size 26"""
     # Write your function here
@@ -61,50 +63,62 @@ def vigenere_decrypt(ciphertext: str, key: str) -> str:
 def crack_key_length_vigenere(ciphertext: str) -> int:
     """Returns the length of the key that was used to generate the given ciphertext with a Vigenere cipher"""
     englishIC = 1.73
-    maxKeyLength = 100  # Assume maximum key length to check
-    minIC_Diff = float('inf')
-    bestKeyLength = 0
-
-    for keylength in range(1, min(maxKeyLength, len(ciphertext) + 1)):
-        totalIC = 0
-        for i in range(keylength):
+    minIC_Diff = 100 # just a really high number for default
+    minIC_DiffKeylength = 0
+    for keylength in range (1, 21):
+        curTotalIC = 0
+        for i in range (0, keylength):
             curCharGroup = ciphertext[i::keylength]
-            totalIC += index_of_coincidence(curCharGroup)
-        averageIC = totalIC / keylength
-
-        if abs(englishIC - averageIC) < minIC_Diff:
+            curTotalIC += index_of_coincidence(curCharGroup)
+        averageIC = curTotalIC / keylength
+        
+        # print(f"keylength: {keylength}, IC: {averageIC}")
+        
+        if minIC_Diff > abs(englishIC - averageIC):
             minIC_Diff = abs(englishIC - averageIC)
-            bestKeyLength = keylength
-
-    return bestKeyLength
+            
+            if minIC_Diff <= 0.15:
+                return keylength
+            
+            minIC_DiffKeylength = keylength
+            
+    return minIC_DiffKeylength
 
 
 def crack_vigenere(ciphertext: str) -> tuple[str, str]:
     """Given a ciphertext generated with the Vigenere cipher, this function cracks the secret key and returns both the key and the plaintext."""
-    key = ''
-    plaintext = ''
-
     key_length = crack_key_length_vigenere(ciphertext)
-    subsequences = []
-
-    for _ in range(key_length):
-        subsequences.append('')
-
+    subsequences = ['' for _ in range(key_length)]
     for i, char in enumerate(ciphertext):
         subsequences[i % key_length] += char
 
-    for i, sub in enumerate(subsequences):
-        freqs = {}
-        for char in sub:
-            if char in freqs:
-                freqs[char] += 1
-            else:
-                freqs[char] = 1
+    english_freqs = {
+        'E': 12.0, 'T': 9.10, 'A': 8.12, 'O': 7.68, 'I': 7.31, 'N': 6.95,
+        'S': 6.28, 'R': 6.02, 'H': 5.92, 'D': 4.32, 'L': 3.98, 'U': 2.88,
+        'C': 2.71, 'M': 2.61, 'F': 2.30, 'Y': 2.11, 'W': 2.09, 'G': 2.03,
+        'P': 1.82, 'B': 1.49, 'V': 1.11, 'K': 0.69, 'X': 0.17, 'Q': 0.11,
+        'J': 0.10, 'Z': 0.07
+    }
 
-        most_freq_char = max(freqs, key=freqs.get)
-        shift = (ord(most_freq_char) - ord('E')) % 26
-        key += chr((ord('A') + shift) % 26 + ord('A'))
+    key = ''
+    for sub in subsequences:
+        freqs = Counter(sub)
+        n = sum(freqs.values())
+        score = {}
+        for shift in range(26):
+            shifted_score = 0 
+            for char in english_freqs: 
+                shifted_char = chr((ord(char) - ord('A') + shift) % 26 + ord('A'))
+                if shifted_char in freqs:
+                    char_freq = freqs[shifted_char] / n
+                else:
+                    char_freq = 0
+                char_score = char_freq * english_freqs[char]
+                shifted_score += char_score
+            score[shift] = shifted_score
+
+        best_shift = max(score, key=score.get)
+        key += chr(ord('A') + best_shift)
 
     plaintext = vigenere_decrypt(ciphertext, key)
-
     return key, plaintext
