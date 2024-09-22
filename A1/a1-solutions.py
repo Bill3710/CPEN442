@@ -61,20 +61,22 @@ def vigenere_decrypt(ciphertext: str, key: str) -> str:
 def crack_key_length_vigenere(ciphertext: str) -> int:
     """Returns the length of the key that was used to generate the given ciphertext with a Vigenere cipher"""
     englishIC = 1.73
-    minIC_Diff = 100 # just a really high number for default
-    minIC_DiffKeylength = 0
-    for keylength in range (1, len(ciphertext)+1):
-        curTotalIC = 0
-        for i in range (0, keylength):
+    maxKeyLength = 100  # Assume maximum key length to check
+    minIC_Diff = float('inf')
+    bestKeyLength = 0
+
+    for keylength in range(1, min(maxKeyLength, len(ciphertext) + 1)):
+        totalIC = 0
+        for i in range(keylength):
             curCharGroup = ciphertext[i::keylength]
-            curTotalIC += index_of_coincidence(curCharGroup)
-        averageIC = curTotalIC / keylength
-        
-        if minIC_Diff > abs(englishIC - averageIC):
+            totalIC += index_of_coincidence(curCharGroup)
+        averageIC = totalIC / keylength
+
+        if abs(englishIC - averageIC) < minIC_Diff:
             minIC_Diff = abs(englishIC - averageIC)
-            minIC_DiffKeylength = keylength
-            
-    return minIC_DiffKeylength
+            bestKeyLength = keylength
+
+    return bestKeyLength
 
 
 def crack_vigenere(ciphertext: str) -> tuple[str, str]:
