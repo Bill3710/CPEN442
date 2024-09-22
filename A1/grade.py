@@ -7,7 +7,7 @@ sol = importlib.import_module("a1-solutions") # the true solution; we compare wi
 stu = importlib.import_module("a1-solutions") # replace this with the student's solution
 
 PATH = os.path.join('assignments', 'a1', 'code') # replace with the path where you have the plaintexts
-PATH_TO_PLAINTEXTS = 'plaintext.txt'
+PATH_TO_PLAINTEXTS = 'plaintexts-for-grading-long.txt'
 
 def reformat_text_to_ascii_uppercase(text: str) -> str:
     """Converts the input 'text' into a string with characters in upper-case characters only"""

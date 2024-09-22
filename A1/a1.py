@@ -1,5 +1,5 @@
-import string
 from collections import Counter
+
 def index_of_coincidence(text: str) -> float:
     """Returns the index of coincidence of a text, assuming the alphabet is of size 26"""
     # Write your function here
@@ -65,7 +65,7 @@ def crack_key_length_vigenere(ciphertext: str) -> int:
     englishIC = 1.73
     minIC_Diff = 100 # just a really high number for default
     minIC_DiffKeylength = 0
-    for keylength in range (1, 21):
+    for keylength in range (1, len(ciphertext)):
         curTotalIC = 0
         for i in range (0, keylength):
             curCharGroup = ciphertext[i::keylength]
@@ -122,3 +122,77 @@ def crack_vigenere(ciphertext: str) -> tuple[str, str]:
 
     plaintext = vigenere_decrypt(ciphertext, key)
     return key, plaintext
+
+
+'''
+# vigenere_encrypt test #
+
+plain1 = open("plaintext1.txt", "r").read()
+cipher1 = open("ciphertext1.txt", "r").read()
+key1 = open("key1.txt", "r").read()
+
+print('## vigenere_encrypt test ##')
+print('-------------------')
+my_cipher1 = vigenere_encrypt(plain1, key1)
+
+print(plain1)
+print('-------------------')
+
+print(cipher1)
+print('-------------------')
+
+print(my_cipher1)
+print(cipher1 == my_cipher1)
+print('-------------------')
+
+# vigenere_decrypt test #
+
+print('## vigenere_decrypt test ##')
+my_plain1 = vigenere_decrypt(cipher1, key1)
+
+print(cipher1)
+print('-------------------')
+
+print(plain1)
+print('-------------------')
+
+print(my_plain1)
+print(plain1 == my_plain1)
+print('-------------------')
+
+'''
+
+#  Question 2.2  #
+cipher2 = open("ciphertext2.txt", "r").read()
+cipher3 = open("ciphertext3.txt", "r").read()
+
+englishIC = 1.73
+
+IC2 = index_of_coincidence(cipher2)
+IC3 = index_of_coincidence(cipher3)
+
+print(IC2)
+print(IC3)
+
+
+'''
+# crack_key_length_vigenere test #
+
+def reformat_text_to_ascii_uppercase(text: str) -> str:
+    """Converts the input 'text' into a string with characters in upper-case characters only"""
+    text = text.upper()
+    final_text = ''.join(c for c in text if c in string.ascii_uppercase)
+    return final_text
+
+
+with open("plaintexts-for-grading-long.txt", 'r') as f:
+    ptxt = f.readlines()
+ptxt = [reformat_text_to_ascii_uppercase(text) for text in ptxt]
+
+testkey = "AJLJKHASFSAFAS"
+for plaintext in ptxt:
+    ctxt = vigenere_encrypt(plaintext,testkey)
+    kl = crack_key_length_vigenere(ctxt)
+    print(kl)
+
+'''

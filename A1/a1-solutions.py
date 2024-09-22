@@ -1,5 +1,5 @@
-import string
 from collections import Counter
+
 def index_of_coincidence(text: str) -> float:
     """Returns the index of coincidence of a text, assuming the alphabet is of size 26"""
     # Write your function here
@@ -65,7 +65,7 @@ def crack_key_length_vigenere(ciphertext: str) -> int:
     englishIC = 1.73
     minIC_Diff = 100 # just a really high number for default
     minIC_DiffKeylength = 0
-    for keylength in range (1, 21):
+    for keylength in range (1, len(ciphertext)):
         curTotalIC = 0
         for i in range (0, keylength):
             curCharGroup = ciphertext[i::keylength]
