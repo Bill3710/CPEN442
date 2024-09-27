@@ -9,7 +9,13 @@ from Crypto.Util.Padding import pad, unpad
 
 def xor_bytes(input1: bytes, input2: bytes) -> bytes:
     """Returns the bit-by-bit XOR of two bytes inputs"""
-    return bytes(1)
+     # truncate the bytes that are longer
+    if len(input1) > len(input2):
+        input1 = input1[-len(input2):]
+    elif len(input2) > len(input1):
+        input2 = input2[-len(input1):]
+
+    return bytes(a ^ b for a, b in zip(input1, input2))
 
 def encrypt_aes_ecb(plaintext: bytes, key: bytes) -> bytes:
     """Encrypts the plaintext with the given key using AES in ECB mode. Returns the cyphertext as a bytes object"""
