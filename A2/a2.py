@@ -6,6 +6,7 @@ from typing import Callable
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Util import Counter
+from utils import ServerCTR
 
 
 def xor_bytes(input1: bytes, input2: bytes) -> bytes:
@@ -68,14 +69,33 @@ def decrypt_aes_ctr(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 
 class AttackCTR:
 
-    def __init__(self):
-        pass
+    def __init__(self, server: ServerCTR):
+        self.server = server
 
     def generate_name_and_pwd(self) -> tuple[str, str]:
-        return '', ''
+        return "guest_user", "guest_pwd"
     
     def modify_token_and_pwd(self, token: bytes) -> tuple[bytes, str]:
-        return bytes(1), ''
+
+        cipher = AES.new(self.server.key, AES.MODE_CTR, nonce=self.server.iv)
+        plaintext = cipher.decrypt(token)
+
+        g_plaintext = b"guest"
+        target = b"superuser"
+
+        idx = plaintext.find(g_plaintext)
+        if idx == -1:
+            print("Guest role not found, returning original token")
+            return token, "guest_pwd"
+        
+        xor_diff = xor_bytes(g_plaintext, target)
+        modified_ciphertext = bytearray(token)
+
+        for i in range(len(xor_diff)):
+            modified_ciphertext[idx + i] ^= xor_diff[i]
+
+        new_pwd = "superpwd"
+        return bytes(modified_ciphertext), new_pwd
 
 
 def attack_ecb(generate_token: Callable) -> str:
