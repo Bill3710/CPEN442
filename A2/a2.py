@@ -20,12 +20,22 @@ def xor_bytes(input1: bytes, input2: bytes) -> bytes:
 
 def encrypt_aes_ecb(plaintext: bytes, key: bytes) -> bytes:
     """Encrypts the plaintext with the given key using AES in ECB mode. Returns the cyphertext as a bytes object"""
-    return bytes(1)
+
+    cipher = AES.new(key, AES.MODE_ECB)
+    padded_plaintext = pad(plaintext, AES.block_size)
+    ciphertext = cipher.encrypt(padded_plaintext)
+
+    return ciphertext
 
 
 def decrypt_aes_ecb(ciphertext: bytes, key: bytes) -> bytes:
     """Decrypts the ciphertext with the given key using AES in ECB mode. Returns the plaintext as a bytes object"""
-    return bytes(1)
+
+    cipher = AES.new(key, AES.MODE_ECB)
+    padded_plaintext = cipher.decrypt(ciphertext)
+    plaintext = unpad(padded_plaintext, AES.block_size)
+
+    return plaintext
 
 def encrypt_aes_cbc(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     cipher = AES.new(key, AES.MODE_CBC, iv)
