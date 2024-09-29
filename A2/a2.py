@@ -91,26 +91,41 @@ class AttackCTR:
         guest_pwd = b"pwd_init" # 8 bytes
         superuser_pwd = b"pwdN" # 4 bytes
         
+        # print("orginial")
+        # print(token)
         second_block, third_block = self.helper_2nd_3rd_block(token)
-        #second_block = d=pwd_init&role=
-        #third_block = guest&code=*****
+        # print("2nd")
+        # print(second_block)
+        # print("3rd")
+        # print(third_block)
+
+        plaintext_second_block = b"d=pwd_init&role="
+        plaintext_third_block = b"guest&code="
 
         target_second = b"d=pwdN&role=supe"
         target_third = b"ruser&code="
 
         padded_target_third = pad(target_third, AES.block_size)
+        padded_orig_third = pad(plaintext_third_block, AES.block_size)
 
-        xor_diff_second =  xor_bytes(target_second, second_block)
-        xor_diff_third = xor_bytes(padded_target_third, third_block)
+        xor_orig_second =  xor_bytes(plaintext_second_block, second_block)
+        xor_orig_third = xor_bytes(padded_orig_third, third_block)
         
-        modified_second_block = xor_bytes(second_block, xor_diff_second)
-        modified_third_block = xor_bytes(third_block, xor_diff_third)
+        modified_second_block = xor_bytes(target_second, xor_orig_second)
+        modified_third_block = xor_bytes(padded_target_third, xor_orig_third)
+
+        # print("modified_2nd")
+        # print(modified_second_block)
+        # print("modified_3rd")
+        # print(modified_third_block)
 
         first_part = token[0: AES.block_size]
         remainder = token[3 * AES.block_size:]
 
         new_token = first_part + modified_second_block + modified_third_block + remainder
 
+        # print("modified")
+        # print(new_token)
         return new_token, "pwdN"
 
 

@@ -26,6 +26,7 @@ class ServerCTR():
         """Receives an encrypted token and a password. It checks that the received password is the same as the password in the token and, if so, it prints out the role stored in the token."""
         cipher = AES.new(self.key, AES.MODE_CTR, nonce=self.iv)
         token = cipher.decrypt(enc_token).decode('ascii')
+        # print(f"Decrypted token: {token}")
         data = {kv.split('=')[0]: kv.split('=')[1] for kv in token.split('&')}
         assert 'pwd' in data
         assert 'role' in data
