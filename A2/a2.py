@@ -81,6 +81,7 @@ class AttackCTR:
         block3 = token[2 * block_size: 3 * block_size - 1]
 
         return block2, block3
+    
     def generate_name_and_pwd(self) -> tuple[str, str]:
         return self.name, self.password
     
@@ -128,6 +129,31 @@ def attack_ecb(generate_token: Callable) -> str:
 
     attack_pwd = 123456789 # allowing the next block ending with the first char in code
 
+    token = generate_token(attack_name, attack_pwd)
+
+    block_num = 0
+    cipher64_dictionary = []
+    target_block = b''
+    for i in range(0, len(token), AES.block_size):
+        cur_block = token[i: i+AES.block_size]
+        # build cipher dictionary, 64 entries in total
+        if block_num >= 1 and block_num <=65:
+            cipher64_dictionary.append(cur_block)
+
+        if block_num == 67:
+            target_block = cur_block
+
+    first_letter = ''
+    
+    for j in range(0,64):
+        if target_block == cipher64_dictionary[j]:
+            first_letter = base64_dictionary[j]
+
+    server_code = '' # length 24, 23 remains to crack
+
+    for k in range(0, 23):
+
+    
 
 
     return ''
