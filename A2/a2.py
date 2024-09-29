@@ -99,4 +99,18 @@ class AttackCTR:
 
 
 def attack_ecb(generate_token: Callable) -> str:
+    base64_dictionary = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '+', '/']
+    attack_name = '12345123456' # fill first block "name=12345123456"
+    pre = 'ole=guest&code=' # 1 more char to complete this block
+
+    for i in range (0, 64):
+        filling = pre + base64_dictionary[i]
+        attack_name += filling
+
+    attack_pwd = 123456789 # allowing the next block ending with the first char in code
+
+
+
     return ''
