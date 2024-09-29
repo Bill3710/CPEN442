@@ -117,3 +117,60 @@ for i in range(0, len(ciphertext_binary), AES.block_size):
     print(substring)
 
 '''
+
+'''
+# test from piazza
+import random
+
+random.seed(0)
+print("  Testing AES-ECB")
+key = randbytes(AES.block_size)
+plaintext = b'This is a test message'
+ciphertext = a2.encrypt_aes_ecb(plaintext, key)
+print(f"ciphertext = '{base64.b64encode(ciphertext).decode('ascii')}'")
+recovered_plaintext = a2.decrypt_aes_ecb(ciphertext, key)
+print(f"recovered plaintext = '{recovered_plaintext.decode('ascii')}'")
+
+print("\n  Testing AES-CBC")
+key = randbytes(AES.block_size)
+iv = randbytes(AES.block_size)
+plaintext = b'This is another test message'
+ciphertext = a2.encrypt_aes_cbc(plaintext, key, iv)
+print(f"ciphertext = '{base64.b64encode(ciphertext).decode('ascii')}'")
+recovered_plaintext = a2.decrypt_aes_cbc(ciphertext, key, iv)
+print(f"recovered plaintext = '{recovered_plaintext.decode('ascii')}'")
+
+print("\n  Testing AES-CTR")
+key = randbytes(AES.block_size)
+iv = randbytes(AES.block_size // 2)
+plaintext = b'This is yet another test message!'
+ciphertext = a2.encrypt_aes_ctr(plaintext, key, iv)
+print(f"ciphertext = '{base64.b64encode(ciphertext).decode('ascii')}'")
+recovered_plaintext = a2.decrypt_aes_ctr(ciphertext, key, iv)
+print(f"recovered plaintext = '{recovered_plaintext.decode('ascii')}'")
+'''
+import utils
+
+'''
+# 3
+my_server_CTR = utils.ServerCTR(seed=0)
+my_attack_CTR = a2.AttackCTR(my_server_CTR)
+name, pwd = my_attack_CTR.generate_name_and_pwd()
+
+token = my_attack_CTR.server.generate_guest_token(name, pwd)
+modified_token, modified_pwd = my_attack_CTR.modify_token_and_pwd(token)
+
+result = my_attack_CTR.server.read_token(modified_token, modified_pwd)
+print(result)
+'''
+
+# 4
+my_server = utils.ServerECB(seed=0) # Initialize server
+my_cracked_code = a2.attack_ecb(my_server.generate_guest_token) # Run attack
+if my_cracked_code[0] == my_server.server_code[0]:
+    print("You got the first character! (25 pts)")
+if my_cracked_code == my_server.server_code:
+    print("You got the full code! (30 pts)")
+
+print(my_cracked_code)
+print(my_server.server_code)
