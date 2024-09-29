@@ -71,31 +71,48 @@ class AttackCTR:
 
     def __init__(self, server: ServerCTR):
         self.server = server
+        self.name = "nameInit"   # 8 bytes + name= (5 bytes) =  13 bytes
+        self.password = "pwd_init" # &pwd= (5 bytes) + 8 bytes + &role=(6 bytes) = 19 bytes 
 
+    def helper_2nd_3rd_block(token:bytes) -> tuple[bytes, bytes]:
+        
+        block_size = 16,
+        block2 = token[block_size: 2 * block_size - 1]
+        block3 = token[2 * block_size: 3 * block_size - 1]
+
+        return block2, block3
     def generate_name_and_pwd(self) -> tuple[str, str]:
-        return "guest_user", "guest_pwd"
+        return self.name, self.password
     
     def modify_token_and_pwd(self, token: bytes) -> tuple[bytes, str]:
+        guest_role = b"guest" # 5 bytes
+        superuser_role = b"superuser" # 9 bytes
 
-        cipher = AES.new(self.server.key, AES.MODE_CTR, nonce=self.server.iv)
-        plaintext = cipher.decrypt(token)
-
-        g_plaintext = b"guest"
-        target = b"superuser"
-
-        idx = plaintext.find(g_plaintext)
-        if idx == -1:
-            print("Guest role not found, returning original token")
-            return token, "guest_pwd"
+        guest_pwd = b"pwd_init" # 8 bytes
+        superuser_pwd = b"pwdN" # 4 bytes
         
-        xor_diff = xor_bytes(g_plaintext, target)
-        modified_ciphertext = bytearray(token)
+        second_block, third_block = self.helper_2nd_3rd_block(token)
+        #second_block = d=pwd_init&role=
+        #third_block = guest&code=*****
 
-        for i in range(len(xor_diff)):
-            modified_ciphertext[idx + i] ^= xor_diff[i]
+        target_second = b"d=pwdN&role=supe"
+        target_third = b"ruser&code="
 
-        new_pwd = "superpwd"
-        return bytes(modified_ciphertext), new_pwd
+        padded_target_third = pad(target_third, AES.block_size)
+
+        xor_diff_second =  xor_bytes(target_second, second_block)
+        xor_diff_third = xor_bytes(padded_target_third, third_block)
+        
+        modified_second_block = xor_bytes(second_block, xor_diff_second)
+        modified_third_block = xor_bytes(third_block, xor_diff_third)
+
+        first_part = token[0 :AES.block_size - 1]
+        remainder = token[3 * AES.block_size:]
+
+        new_token = first_part + modified_second_block + modified_third_block + remainder
+
+        return new_token, "pwdN"
+
 
 
 def attack_ecb(generate_token: Callable) -> str:
