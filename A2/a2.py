@@ -76,14 +76,10 @@ class AttackCTR:
         return "guest_user", "guest_pwd"
     
     def modify_token_and_pwd(self, token: bytes) -> tuple[bytes, str]:
-
-        cipher = AES.new(self.server.key, AES.MODE_CTR, nonce=self.server.iv)
-        plaintext = cipher.decrypt(token)
-
         g_plaintext = b"guest"
         target = b"superuser"
 
-        idx = plaintext.find(g_plaintext)
+        idx = token.find(g_plaintext)
         if idx == -1:
             print("Guest role not found, returning original token")
             return token, "guest_pwd"
@@ -94,8 +90,7 @@ class AttackCTR:
         for i in range(len(xor_diff)):
             modified_ciphertext[idx + i] ^= xor_diff[i]
 
-        new_pwd = "superpwd"
-        return bytes(modified_ciphertext), new_pwd
+        return bytes(modified_ciphertext), "guest_pwd"
 
 
 def attack_ecb(generate_token: Callable) -> str:
