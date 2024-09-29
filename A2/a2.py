@@ -54,16 +54,14 @@ def decrypt_aes_cbc(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
 
 def encrypt_aes_ctr(plaintext: bytes, key: bytes, iv: bytes) -> bytes:
     """Encrypts the plaintext with the given key and IV using AES in CTR mode. Returns the cyphertext as a bytes object"""
-    ctr = Counter.new(128, initial_value=int.from_bytes(iv, byteorder='big'))
-    cipher = AES.new(key, AES.MODE_CTR, counter=ctr)
+    cipher = AES.new(key, AES.MODE_CTR, nonce=iv)
     ciphertext = cipher.encrypt(plaintext)
     return ciphertext
 
 
 def decrypt_aes_ctr(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
     """Decrypts the ciphertext with the given key and IV using AES in CTR mode. Returns the plaintext as a bytes object"""
-    ctr = Counter.new(128, initial_value=int.from_bytes(iv, byteorder='big'))
-    cipher = AES.new(key, AES.MODE_CTR, counter=ctr)
+    cipher = AES.new(key, AES.MODE_CTR, nonce=iv)
     plaintext = cipher.decrypt(ciphertext)
     return plaintext
 
