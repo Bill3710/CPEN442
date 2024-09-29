@@ -117,17 +117,20 @@ class AttackCTR:
 
 
 def attack_ecb(generate_token: Callable) -> str:
+
     base64_dictionary = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
                         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
                         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '+', '/']
+    # Step 1 get the first letter in server code
     attack_name = '12345123456' # fill first block "name=12345123456"
     pre = 'ole=guest&code=' # 1 more char to complete this block
 
+    # Structure: 0-65 blocks contain name info, 66 is pwd, 67 is the block to crack, 1-65 is the dictionary
     for i in range (0, 64):
         filling = pre + base64_dictionary[i]
         attack_name += filling
 
-    attack_pwd = 123456789 # allowing the next block ending with the first char in code
+    attack_pwd = '123456789' # this block "&pwd=123456789&r", allowing the next block ending with the first char of server code
 
     token = generate_token(attack_name, attack_pwd)
 
@@ -136,24 +139,113 @@ def attack_ecb(generate_token: Callable) -> str:
     target_block = b''
     for i in range(0, len(token), AES.block_size):
         cur_block = token[i: i+AES.block_size]
+        block_num += 1
         # build cipher dictionary, 64 entries in total
         if block_num >= 1 and block_num <=65:
             cipher64_dictionary.append(cur_block)
 
         if block_num == 67:
             target_block = cur_block
+            break
 
     first_letter = ''
     
     for j in range(0,64):
         if target_block == cipher64_dictionary[j]:
             first_letter = base64_dictionary[j]
-
-    server_code = '' # length 24, 23 remains to crack
-
-    for k in range(0, 23):
-
+            
+    if first_letter == '':
+        print('failed to find first letter')        
     
+    server_code = first_letter + '' # length 24, 23 remains to crack
+
+    # Step 2: get the next 15 letters in server code
+    attack_name = '12345123456' # fill first block "name=12345123456"
+    attack_pwd = '1234567890123456789123456' # construct blocks "&pwd=12345678901" "23456789123456&r" to allow shift positions in next step
+
+    # Structure: 0-65 blocks contain name info, 66/67 is pwd, 68 is the block to crack, 1-65 is the dictionary
+
+    for k in range(1, 16):  # get the first 16 chars first
+        cur_name = attack_name # fill first block "name=12345123456"
+        
+        cur_pre = pre[k: ] + server_code[0: k]
+
+        for i in range (0, 64):
+            filling = cur_pre + base64_dictionary[i]
+            cur_name += filling
+
+        cur_passpwd = attack_pwd[: -k] # reduce the length of pwd one by one to get the code one by one
+
+        token = generate_token(cur_name, cur_passpwd)
+
+        block_num = 0
+        cur_cipher64_dictionary = []
+        target_block = b''
+        for i in range(0, len(token), AES.block_size):
+            cur_block = token[i: i+AES.block_size]
+            block_num += 1
+            # build cipher dictionary, 64 entries in total
+            if block_num >= 1 and block_num <=65:
+                cur_cipher64_dictionary.append(cur_block)
+
+            if block_num == 68:
+                target_block = cur_block
+                break
+
+        cur_letter = ''
+
+        for j in range(0,64):
+            if target_block == cur_cipher64_dictionary[j]:
+                cur_letter = base64_dictionary[j]
+
+        if cur_letter == '':
+            print(f'failed to find {k}th letter')
+
+        server_code += cur_letter
+
+    # Step3: get the remaining 8 letters in the server code
+    attack_name = '12345123456' # name remain unchanged
+    attack_pwd = '123456789' # password can be shorter since only 8 char remains
+
+    # Structure: 0-65 blocks contain name info, 66 is pwd, 68 is the block to crack, 1-65 is the dictionary
+
+    for k in range(0, 8): 
+        cur_name = attack_name # fill first block "name=12345123456"
+        
+        cur_pre = server_code[1+k: ] # first 15 chars in block 68
+
+        for i in range (0, 64):
+            filling = cur_pre + base64_dictionary[i]
+            cur_name += filling
+
+        cur_passpwd = attack_pwd[: len(attack_pwd)-k] # reduce the length of pwd one by one to get the code one by one
+
+        token = generate_token(cur_name, cur_passpwd)
+
+        block_num = 0
+        cur_cipher64_dictionary = []
+        target_block = b''
+        for i in range(0, len(token), AES.block_size):
+            cur_block = token[i: i+AES.block_size]
+            block_num += 1
+            # build cipher dictionary, 64 entries in total
+            if block_num >= 1 and block_num <=65:
+                cur_cipher64_dictionary.append(cur_block)
+
+            if block_num == 68:
+                target_block = cur_block
+                break
+
+        cur_letter = ''
+
+        for j in range(0,64):
+            if target_block == cur_cipher64_dictionary[j]:
+                cur_letter = base64_dictionary[j]
+
+        if cur_letter == '':
+            print(f'failed to find {k}th letter')
+
+        server_code += cur_letter
 
 
-    return ''
+    return server_code
