@@ -134,3 +134,15 @@ class AliceAndBob():
         M = b"Eve said this, do not trust her: '" + M_eve + b"'"
         return self.send_message(M)
 
+def mod_pow(x: int, y: int, n: int) -> int:
+    """Computes x**y % n using the binary modular exponentiation algorithm."""
+    result = 1
+    x = x % n
+
+    while y > 0:
+
+        if y % 2 == 1:
+            result = (result * x) % n
+        x = (x * x) % n
+        y //= 2
+    return result

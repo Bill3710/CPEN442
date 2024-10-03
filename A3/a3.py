@@ -6,17 +6,32 @@ from typing import Callable
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Hash import SHA256
+from Crypto.Util.number import getPrime
 from utils import extended_gcd
 import random
 
 
 def mod_pow(x: int, y: int, n: int) -> int:
     """Computes x**y % n using the binary modular exponentiation algorithm."""
-    return 0
+    result = 1
+    x = x % n
+
+    while y > 0:
+
+        if y % 2 == 1:
+            result = (result * x) % n
+        x = (x * x) % n
+        y //= 2
+    return result
 
 def mod_inv(x: int, n: int) -> int:
     """Computes the modular multiplicative inverse of x modulo n. It raises an error if the inverse does not exist."""
-    return 0
+    gcd, inverse, _ = extended_gcd(x, n)
+    
+    if gcd != 1:
+        raise ValueError(f"No modular inverse exists for {x} mod {n}")
+
+    return inverse % n
     
 def attack_q21(C_aes: bytes, C_rsa: int, e: int, n: int, p: int) -> str:
     """Implements a trivial attack against RSA as explained in question 2.1"""
