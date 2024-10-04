@@ -65,7 +65,7 @@ def forge_signature2(M1: int, T1: int, M2: int, T2: int, e: int, n: int) -> int:
     M3 = (M1 * M2) % n
     T3 = (T1 * T2) % n
     
-    return M3, T3
+    return T3
 
 def forge_signature3(e: int, n: int, sign: Callable) -> tuple[int, int]:
     """Forges a signature for the message ``Transfer all of Alice's money to Eve'' that can be verified with Alice's private key (d)"""
