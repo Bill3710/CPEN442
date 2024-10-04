@@ -80,11 +80,35 @@ def forge_signature3(e: int, n: int, sign: Callable) -> tuple[int, int]:
 
 def find_collision(hash: Callable) -> tuple[bytes, bytes]:
     """Finds a collision for the callable hash function received as input. Returns the two inputs that have the same digest."""
-    return bytes(1), bytes(1)
+    dict = []
+    key1 = b''
+    key2 = b''
+    while True:
+        cur_size = random.randint(1, 16)
+        cur_key = random.randbytes(cur_size)
+        cur_hash = hash(cur_key)
+        for i in range(0, len(dict)):
+            if dict[i][1] == cur_hash and dict[i][0] != cur_key:
+                key1 = dict[i][0]
+                key2 = cur_key
+                break
+        else:
+            dict.append((cur_key,cur_hash))
+
+    return key1, key2
         
 def find_preimage(hash: Callable, digest: bytes) -> bytes:
     "Finds a pre-image for the given digest using the given callable hash function"
-    return bytes(1)
+    preimage = b''
+    while True:
+        cur_size = random.randint(1, 16)
+        cur_key = random.randbytes(cur_size)
+        cur_hash = hash(cur_key)
+        if cur_hash == digest:
+            preimage = cur_key
+            break
+
+    return preimage
         
 
 class Eve():
@@ -94,8 +118,26 @@ class Eve():
         return
     
     def craft_message(self, M_evil: str) -> bytes:
-        return bytes(1)
+        M_evil_bytes = M_evil.encode('ascii')
+        message_length = len(M_evil_bytes)
+        remainder = message_length % AES.block_size
+
+        result_message = M_evil_bytes[:message_length-remainder]
+
+        if remainder != 0:
+            last_block = pad(M_evil_bytes[:-remainder], AES.block_size)
+            result_message += last_block
+
+        hash_digest = SHA256.new(data=result_message).digest()    
+
+        return result_message + hash_digest
     
     def modify_ciphertext_and_iv(self, C: bytes, IV: bytes) -> tuple[bytes, bytes]:
-        return bytes(1), bytes(1)
+        # c2 will always be the iv for our message
+        new_IV = C[AES.block_size: 2*AES.block_size]
+
+        # remove the starting two blocks and the last 3 blocks 
+        new_cipher = C[2*AES.block_size: len(C) - 3*AES.block_size]
+
+        return new_cipher, new_IV
     
