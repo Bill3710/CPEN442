@@ -47,7 +47,7 @@ def attack_q21(C_aes: bytes, C_rsa: int, e: int, n: int, p: int) -> str:
     aes_key = mod_pow(C_rsa, d, n)
 
     aes_key_byte = aes_key.to_bytes(AES.block_size, byteorder='big')
-    print("key is ", aes_key)
+    # print("key is ", aes_key)
     cipher = AES.new(aes_key_byte, AES.MODE_CBC, iv = bytes(AES.block_size))
     plaintext = unpad(cipher.decrypt(C_aes), AES.block_size)
     plaintext_str = plaintext.decode('ascii')
@@ -56,15 +56,26 @@ def attack_q21(C_aes: bytes, C_rsa: int, e: int, n: int, p: int) -> str:
 
 def forge_signature1(e: int, n: int) -> tuple[int, int]:
     """Creates valid message-signature pairs (M, T) to be verified with the decryption key"""
-    return 0, 0
+    T = random.randint(1, n - 1)
+    M = mod_pow(T, e, n)
+    return M, T
 
 def forge_signature2(M1: int, T1: int, M2: int, T2: int, e: int, n: int) -> int:
     """Creates a valid message-signature pair (M3, T3) for message M3 = M1 * M2 (mod n)"""
-    return 0
+    M3 = (M1 * M2) % n
+    T3 = (T1 * T2) % n
+    
+    return M3, T3
 
 def forge_signature3(e: int, n: int, sign: Callable) -> tuple[int, int]:
     """Forges a signature for the message ``Transfer all of Alice's money to Eve'' that can be verified with Alice's private key (d)"""
-    return 0, 0
+    M_str = "Transfer all of Alice's money to Eve"
+    M = int.from_bytes(M_str.encode('ascii'), byteorder='big')
+
+    e_inv = mod_inv(e,n)
+    T = mod_pow(M, e_inv, n)
+
+    return M, T
 
 
 def find_collision(hash: Callable) -> tuple[bytes, bytes]:
