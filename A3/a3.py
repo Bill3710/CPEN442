@@ -35,7 +35,24 @@ def mod_inv(x: int, n: int) -> int:
     
 def attack_q21(C_aes: bytes, C_rsa: int, e: int, n: int, p: int) -> str:
     """Implements a trivial attack against RSA as explained in question 2.1"""
-    return ''
+    q  = n // p
+    # print(p,q)
+    fi = (q - 1) * (p - 1)
+
+    d = mod_inv(e, fi)
+
+    # print("aes input", C_aes)
+    # print("rsa input", C_rsa)
+    
+    aes_key = mod_pow(C_rsa, d, n)
+
+    aes_key_byte = aes_key.to_bytes(AES.block_size, byteorder='big')
+    print("key is ", aes_key)
+    cipher = AES.new(aes_key_byte, AES.MODE_CBC, iv = bytes(AES.block_size))
+    plaintext = unpad(cipher.decrypt(C_aes), AES.block_size)
+    plaintext_str = plaintext.decode('ascii')
+
+    return plaintext_str
 
 def forge_signature1(e: int, n: int) -> tuple[int, int]:
     """Creates valid message-signature pairs (M, T) to be verified with the decryption key"""
@@ -70,3 +87,4 @@ class Eve():
     
     def modify_ciphertext_and_iv(self, C: bytes, IV: bytes) -> tuple[bytes, bytes]:
         return bytes(1), bytes(1)
+    

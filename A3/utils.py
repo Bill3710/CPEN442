@@ -4,7 +4,7 @@ from Crypto.Util import number
 from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-from a3secret import mod_pow
+# from a3secret import mod_pow
 
 
 def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
