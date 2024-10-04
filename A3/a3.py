@@ -128,7 +128,11 @@ class Eve():
             last_block = pad(M_evil_bytes[:-remainder], AES.block_size)
             result_message += last_block
 
-        hash_digest = SHA256.new(data=result_message).digest()    
+        hash_digest = SHA256.new(data=result_message).digest()   
+        
+        print('in craft_message')
+        print(result_message) 
+        print(hash_digest)
 
         return result_message + hash_digest
     
