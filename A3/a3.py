@@ -122,18 +122,18 @@ class Eve():
         message_length = len(M_evil_bytes)
         remainder = message_length % AES.block_size
 
-        result_message = M_evil_bytes[:message_length-remainder]
+        result_message = M_evil_bytes
 
         if remainder != 0:
-            last_block = pad(M_evil_bytes[:-remainder], AES.block_size)
-            result_message += last_block
+            last_block = pad(M_evil_bytes[-remainder:], AES.block_size)
+
+            if message_length > AES.block_size:
+                result_message = M_evil_bytes[:message_length-remainder] + last_block
+            else:
+                result_message = last_block
 
         hash_digest = SHA256.new(data=result_message).digest()   
         
-        print('in craft_message')
-        print(result_message) 
-        print(hash_digest)
-
         return result_message + hash_digest
     
     def modify_ciphertext_and_iv(self, C: bytes, IV: bytes) -> tuple[bytes, bytes]:
