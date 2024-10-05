@@ -83,7 +83,8 @@ def find_collision(hash: Callable) -> tuple[bytes, bytes]:
     dict = []
     key1 = b''
     key2 = b''
-    while True:
+    found = False
+    while not found:
         cur_size = random.randint(1, 16)
         cur_key = random.randbytes(cur_size)
         cur_hash = hash(cur_key)
@@ -91,6 +92,7 @@ def find_collision(hash: Callable) -> tuple[bytes, bytes]:
             if dict[i][1] == cur_hash and dict[i][0] != cur_key:
                 key1 = dict[i][0]
                 key2 = cur_key
+                found = True
                 break
         else:
             dict.append((cur_key,cur_hash))
@@ -100,13 +102,13 @@ def find_collision(hash: Callable) -> tuple[bytes, bytes]:
 def find_preimage(hash: Callable, digest: bytes) -> bytes:
     "Finds a pre-image for the given digest using the given callable hash function"
     preimage = b''
-    while True:
-        cur_size = random.randint(1, 16)
-        cur_key = random.randbytes(cur_size)
+    found = False
+    while not found:
+        cur_key = random.randbytes(32)
         cur_hash = hash(cur_key)
         if cur_hash == digest:
             preimage = cur_key
-            break
+            found = True
 
     return preimage
         
@@ -118,30 +120,38 @@ class Eve():
         return
     
     def craft_message(self, M_evil: str) -> bytes:
+        # first block: [Eve_said_this,_d] 
+        # second block: [o_not_trust_her:]
+        # third block: [_'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e]
         M_evil_bytes = M_evil.encode('ascii')
+
         message_length = len(M_evil_bytes)
         remainder = message_length % AES.block_size
+
+        third_pad = b'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
 
         result_message = M_evil_bytes
 
         if remainder != 0:
             last_block = pad(M_evil_bytes[-remainder:], AES.block_size)
-
+            
             if message_length > AES.block_size:
                 result_message = M_evil_bytes[:message_length-remainder] + last_block
             else:
                 result_message = last_block
 
-        hash_digest = SHA256.new(data=result_message).digest()   
+        hash_digest = SHA256.new(data=result_message).digest()
+
+        # print(result_message)
         
-        return result_message + hash_digest
+        return third_pad + result_message + hash_digest
     
     def modify_ciphertext_and_iv(self, C: bytes, IV: bytes) -> tuple[bytes, bytes]:
-        # c2 will always be the iv for our message
-        new_IV = C[AES.block_size: 2*AES.block_size]
+        # c3 will always be the iv for our message
+        new_IV = C[2*AES.block_size: 3*AES.block_size]
 
-        # remove the starting two blocks and the last 3 blocks 
-        new_cipher = C[2*AES.block_size: len(C) - 3*AES.block_size]
+        # remove the starting three blocks and the last 3 blocks 
+        new_cipher = C[3*AES.block_size: len(C) - 3*AES.block_size]
 
         return new_cipher, new_IV
     
