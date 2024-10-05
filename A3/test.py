@@ -51,6 +51,7 @@ def testing_alice_and_bob():
 
 # Test
 if __name__ == "__main__":
+
     # 2.1 test, from lab manual
     # # Bob creates message for Alice
     M_str = "Hello, world!"
@@ -83,9 +84,9 @@ if __name__ == "__main__":
     # 2.2 2.3 2.4 test
     evaluate_forge_signature()
 
-
     # 3.1 3.2 test
-    rand_bytes = random.randbytes(32)
+    
+    rand_bytes = random.randbytes(3)
     
     t1 = time.time()
     key1, key2 = a3.find_collision(my_hash)
@@ -104,6 +105,27 @@ if __name__ == "__main__":
         print(f'find_preimage passed! took {t4-t3} seconds')
     else:
         print(f'find_preimage failed! took {t4-t3} seconds')
+    
+
+    iterations = 10
+    collision_total_time = 0
+    preimage_total_time = 0
+    for i in range(0, iterations):
+        t1 = time.time()
+        key1, key2 = a3.find_collision(my_hash)
+        t2 = time.time()
+
+        rand_bytes = random.randbytes(3)
+
+        t3 = time.time()
+        preimage = a3.find_preimage(my_hash, my_hash(rand_bytes))
+        t4 = time.time()
+
+        collision_total_time += (t2 - t1)
+        preimage_total_time += (t4 - t3)
+    
+    print(f'find_collision in average took {collision_total_time/iterations} seconds')
+    print(f'find_preimage in average took {preimage_total_time/iterations} seconds')
 
     # 3.4 test
     testing_alice_and_bob()
