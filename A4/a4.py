@@ -9,11 +9,10 @@ def online_attack(check_password: Callable) -> str:
     
     guessed_password = ""
 
-    maxlength = 10
+    length = find_length(check_password)
 
-    while len(guessed_password) <= maxlength:
-        maxTime = -1
-        # current_char = None
+    while len(guessed_password) <= length:
+        maxTime = -0.001
         times = np.zeros(len(charset))
 
         for i, char in enumerate(charset):
@@ -22,11 +21,7 @@ def online_attack(check_password: Callable) -> str:
             start = time.perf_counter()
             check_password(temp)
             times[i] = time.perf_counter() - start
-            # print(times[i] > (maxTime + 0.0001), maxTime, char, "result \n")
 
-            # if times[i] >= maxTime + 0.0001:
-            #     maxTime = times[i]
-            #     current_char = char
         index = 0
         for i in range(0,len(times)):
             if times[i] >= maxTime:
@@ -35,10 +30,30 @@ def online_attack(check_password: Callable) -> str:
 
         guessed_password += charset[index]
         
-        # guessed_password += current_char
-        # print("more char \n", guessed_password)
         if check_password(guessed_password):
             print("password find!!!\n")
             return guessed_password
         
     return guessed_password
+
+def find_length(check_password: Callable) -> int:
+
+    maxLength  = 10
+    maxTime = -0.001
+
+    length = np.zeros(maxLength + 1)
+    for len in range(5, 11):
+        guess = '/' * len 
+        start = time.perf_counter()
+        check_password(guess)
+        time_taken = time.perf_counter() - start
+
+        if time_taken > maxTime:
+            length[len] = time_taken
+    
+    for i, time_taken in enumerate(length):
+        if time_taken > maxTime:
+            maxTime = time_taken
+            true_length  = i
+
+    return true_length
