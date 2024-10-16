@@ -3,8 +3,6 @@ import time
 import numpy as np
 
 def online_attack(check_password: Callable) -> str:
-    # TODO Implement attack here by calling check_password
-    # Return the password
     charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     
     guessed_password = ""
@@ -34,14 +32,14 @@ def online_attack(check_password: Callable) -> str:
             print("password find!!!\n")
             return guessed_password
         
+    print("guessed_length", length)
     return guessed_password
 
 def find_length(check_password: Callable) -> int:
 
-    maxLength  = 10
     maxTime = -0.001
+    true_length = 0
 
-    length = np.zeros(maxLength + 1)
     for len in range(5, 11):
         guess = '/' * len 
         start = time.perf_counter()
@@ -49,11 +47,7 @@ def find_length(check_password: Callable) -> int:
         time_taken = time.perf_counter() - start
 
         if time_taken > maxTime:
-            length[len] = time_taken
-    
-    for i, time_taken in enumerate(length):
-        if time_taken > maxTime:
             maxTime = time_taken
-            true_length  = i
+            true_length = len
 
     return true_length
