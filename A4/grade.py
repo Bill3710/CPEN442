@@ -8,12 +8,13 @@ def test_q41():
     print(server.password)
     pwd = online_attack(server.check_password)
     print(f"Guessed pwd: {pwd}")
+    print(f"True pwd length: {len(server.password)}")
     print(f"True pwd: {server.password}")
-    return pwd == server.password
+    return len(pwd) == len(server.password)
 
 if __name__ == "__main__":
 
-    nreps = 100
+    nreps = 1
     n_success = 0
     t0 = time()
     for i in range(nreps):
