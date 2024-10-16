@@ -9,7 +9,7 @@ def online_attack(check_password: Callable) -> str:
 
     length = find_length(check_password)
 
-    while len(guessed_password) <= length:
+    while len(guessed_password) < length:
         maxTime = -0.001
         times = np.zeros(len(charset))
 
@@ -32,7 +32,6 @@ def online_attack(check_password: Callable) -> str:
             print("password find!!!\n")
             return guessed_password
         
-    print("guessed_length", length)
     return guessed_password
 
 def find_length(check_password: Callable) -> int:
