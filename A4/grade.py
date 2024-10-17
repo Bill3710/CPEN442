@@ -13,7 +13,7 @@ def test_q41():
 
 if __name__ == "__main__":
 
-    nreps = 1
+    nreps = 100
     n_success = 0
     t0 = time()
     for i in range(nreps):

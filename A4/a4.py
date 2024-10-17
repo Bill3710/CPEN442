@@ -4,35 +4,32 @@ import numpy as np
 
 def online_attack(check_password: Callable) -> str:
     charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    
-    guessed_password = ""
 
     length = find_length(check_password)
-
-    while len(guessed_password) < length:
+    
+    guessed_password = ['A'] * length
+    
+    for i in range(length):
         maxTime = -0.001
         times = np.zeros(len(charset))
 
-        for i, char in enumerate(charset):
-            
-            temp = guessed_password + char
+        for j in range(len(charset)):
+            guessed_password[i] = charset[j]
             start = time.perf_counter()
-            check_password(temp)
-            times[i] = time.perf_counter() - start
+            check_password(''.join(guessed_password))
+            times[j] = time.perf_counter() - start
 
-        index = 0
-        for i in range(0,len(times)):
-            if times[i] >= maxTime:
-                maxTime = times[i]
-                index = i
 
-        guessed_password += charset[index]
+        for k in range(len(times)):
+            if times[k] > maxTime:
+                maxTime = times[k]
+                guessed_password[i] = charset[k]
         
         if check_password(guessed_password):
             print("password find!!!\n")
             return guessed_password
-        
-    return guessed_password
+    
+    return ''.join(guessed_password)
 
 def find_length(check_password: Callable) -> int:
 
