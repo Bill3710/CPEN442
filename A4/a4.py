@@ -34,12 +34,12 @@ def online_attack(check_password: Callable) -> str:
             current_max_time = times[maxIndex]
 
 
-            if current_max_time - maxTime[i - 1] >= 0.0003:  
+            if current_max_time - maxTime[i - 1] >= 0.0005:  
                 guessed_password[i] = charset[maxIndex]
                 maxTime[i] = current_max_time
                 i += 1
             else:
-                print("Revert, current index is", i, "Max Time Difference:", current_max_time - maxTime[i - 1], "current passward:", ''.join(guessed_password))
+                guessed_password[i] = '@'
                 i = max(0, i - 1)
 
     return ''.join(guessed_password)
