@@ -5,7 +5,7 @@ import numpy as np
 def online_attack(check_password: Callable) -> str:
     charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     length = find_length(check_password)
-    guessed_password = ['A'] * length
+    guessed_password = ['@'] * length
     maxTime = np.zeros(length)
     i = 0
 
@@ -18,6 +18,8 @@ def online_attack(check_password: Callable) -> str:
                 curr_pwd = ''.join(guessed_password)
                 if check_password(curr_pwd):
                     return curr_pwd
+                if char == charset[-1]:
+                    i = i//2
         else:
  
             for j in range(len(charset)):
@@ -37,7 +39,7 @@ def online_attack(check_password: Callable) -> str:
                 maxTime[i] = current_max_time
                 i += 1
             else:
-                print("Revert, current index is", i, "Max Time Difference:", current_max_time - maxTime, "current passward:", ''.join(guessed_password))
+                print("Revert, current index is", i, "Max Time Difference:", current_max_time - maxTime[i - 1], "current passward:", ''.join(guessed_password))
                 i = max(0, i - 1)
 
     return ''.join(guessed_password)
